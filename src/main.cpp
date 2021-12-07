@@ -384,3 +384,13 @@ void init_model_3()
 
   obj[2].tr.translation = vec3(2.0, 0.0, -10.0);
 }
+
+void init_missil() {
+    /*mesh = load_off_file("data/missile.off");*/
+    float s = 0.01f;
+    mat4 transform = mat4(s, 0.0f, 0.0f, 0.0f,
+        0.0f, s, 0.0f, 0.0f,
+        0.0f, 0.0f, s, 0.02f,
+        0.0f, 0.0f, 0.0f, 0.0f);
+
+}
