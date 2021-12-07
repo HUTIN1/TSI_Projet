@@ -1,0 +1,12 @@
+C:/4A/TSI/projet_tsi/build/CMakeFiles/projet.dir
+C:/4A/TSI/projet_tsi/build/CMakeFiles/INSTALL.dir
+C:/4A/TSI/projet_tsi/build/CMakeFiles/ALL_BUILD.dir
+C:/4A/TSI/projet_tsi/build/CMakeFiles/ZERO_CHECK.dir
+C:/4A/TSI/projet_tsi/build/extern/glew/CMakeFiles/libglew_static.dir
+C:/4A/TSI/projet_tsi/build/extern/glew/CMakeFiles/INSTALL.dir
+C:/4A/TSI/projet_tsi/build/extern/glew/CMakeFiles/ALL_BUILD.dir
+C:/4A/TSI/projet_tsi/build/extern/freeglut/CMakeFiles/freeglut_static.dir
+C:/4A/TSI/projet_tsi/build/extern/freeglut/CMakeFiles/INSTALL.dir
+C:/4A/TSI/projet_tsi/build/extern/freeglut/CMakeFiles/ALL_BUILD.dir
+C:/4A/TSI/projet_tsi/build/tools/CMakeFiles/tools.dir
+C:/4A/TSI/projet_tsi/build/tools/CMakeFiles/INSTALL.dir

@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\4A\TSI\projet_tsi\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\4A\TSI\projet_tsi\src\declaration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\4A\TSI\projet_tsi\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\4A\TSI\projet_tsi\shaders\gui.frag" />
+    <None Include="C:\4A\TSI\projet_tsi\shaders\gui.vert" />
+    <None Include="C:\4A\TSI\projet_tsi\shaders\shader.frag" />
+    <None Include="C:\4A\TSI\projet_tsi\shaders\shader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{CE243266-790F-3169-B871-84F30380FBCD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{89803E7C-6B69-388B-A056-8FC40807004F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
