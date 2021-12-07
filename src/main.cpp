@@ -392,5 +392,5 @@ void init_missil() {
         0.0f, s, 0.0f, 0.0f,
         0.0f, 0.0f, s, 0.02f,
         0.0f, 0.0f, 0.0f, 0.0f);
-
+    //coucou
 }
