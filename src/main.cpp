@@ -12,8 +12,10 @@ GLuint shader_program_id;
 GLuint gui_program_id;
 
 camera cam;
+vec3 cam_vec_directeur = vec3(0.0f, 0.0f,-0.3f);
+vec3 cam_vec_cote = vec3( 0.3f, 0.0f, 0.0f);
 
-const int nb_obj = 3;
+const int nb_obj = 4;
 objet3d obj[nb_obj];
 
 const int nb_text = 2;
@@ -28,43 +30,45 @@ static void init()
   shader_program_id = glhelper::create_program_from_file("shaders/shader.vert", "shaders/shader.frag"); CHECK_GL_ERROR();
 
   cam.projection = matrice_projection(60.0f*M_PI/180.0f,1.0f,0.01f,100.0f);
-  cam.tr.translation = vec3(0.0f, 1.0f, 0.0f);
-  // cam.tr.translation = vec3(0.0f, 20.0f, 0.0f);
-  // cam.tr.rotation_center = vec3(0.0f, 20.0f, 0.0f);
-  // cam.tr.rotation_euler = vec3(M_PI/2., 0.0f, 0.0f);
+  cam.tr.translation = vec3(0.0f, 2.0f, 0.0f);
+  //cam.tr.translation = vec3(0.0f, 20.0f, 0.0f);
+   cam.tr.rotation_center = vec3(0.0f, 1.0f, 0.0f);
+   cam.tr.rotation_euler = vec3(0.0f, 0.0f, 0.0f);
 
   init_model_1();
   init_model_2();
   init_model_3();
+  init_missil();
 
-  gui_program_id = glhelper::create_program_from_file("shaders/gui.vert", "shaders/gui.frag"); CHECK_GL_ERROR();
 
-  text_to_draw[0].value = "CPE";
-  text_to_draw[0].bottomLeft = vec2(-0.2, 0.5);
-  text_to_draw[0].topRight = vec2(0.2, 1);
-  init_text(text_to_draw);
+  //text_to_draw[0].value = "CPE";
+  //text_to_draw[0].bottomLeft = vec2(-0.2, 0.5);
+  //text_to_draw[0].topRight = vec2(0.2, 1);
+  //init_text(text_to_draw);
 
-  text_to_draw[1]=text_to_draw[0];
-  text_to_draw[1].value = "Lyon";
-  text_to_draw[1].bottomLeft.y = 0.0f;
-  text_to_draw[1].topRight.y = 0.5f;
+  //text_to_draw[1]=text_to_draw[0];
+  //text_to_draw[1].value = "Lyon";
+  //text_to_draw[1].bottomLeft.y = 0.0f;
+  //text_to_draw[1].topRight.y = 0.5f;
+ 
 }
 
 /*****************************************************************************\
 * display_callback                                                           *
 \*****************************************************************************/
- static void display_callback()
+static void display_callback()
 {
-  glClearColor(0.5f, 0.6f, 0.9f, 1.0f); CHECK_GL_ERROR();
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
-
-  for(int i = 0; i < nb_obj; ++i)
-    draw_obj3d(obj + i, cam);
-
-  for(int i = 0; i < nb_text; ++i)
-    draw_text(text_to_draw + i);
+    glClearColor(0.5f, 0.6f, 0.9f, 1.0f); CHECK_GL_ERROR();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
+    int i;
+    for (i = 0; i < nb_obj; ++i) {
+        draw_obj3d(obj + i, cam);
+    }
+  /*for(int i = 0; i < nb_text; ++i)
+    draw_text(text_to_draw + i);*/
 
   glutSwapBuffers();
+ 
 }
 
 /*****************************************************************************\
@@ -72,6 +76,7 @@ static void init()
 \*****************************************************************************/
 static void keyboard_callback(unsigned char key, int, int)
 {
+    float dl = 0.3f;
   switch (key)
   {
     case 'p':
@@ -82,7 +87,36 @@ static void keyboard_callback(unsigned char key, int, int)
     case 27:
       exit(0);
       break;
+
+    case 'a':
+        obj[3].visible = true;
+        printf("j appuie sur a \n");
+        break;
+
+    case 'b':
+        obj[0].tr.translation.x += 0.01f;
+        break;
+
+    case 'e':
+        cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f)* matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_directeur;
+        cam.tr.rotation_center += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_directeur;
+        break;
+    case 'd':
+        cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) *  cam_vec_directeur;
+        cam.tr.rotation_center -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f,- 1.0f, 0.0f)  * cam_vec_directeur;
+        break;
+    case 'f':
+        cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  *cam_vec_cote;
+        cam.tr.rotation_center+= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_cote;
+        break;
+    case 's':
+        cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  *cam_vec_cote;
+        cam.tr.rotation_center -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_cote;
+        break;
+
+  
   }
+  cam.tr.translation.y = 2.0f;
 }
 
 /*****************************************************************************\
@@ -90,6 +124,23 @@ static void keyboard_callback(unsigned char key, int, int)
 \*****************************************************************************/
 static void special_callback(int key, int, int)
 {
+}
+
+/****************************************************************************\
+* look                                                                       *
+\****************************************************************************/
+static void look(int x, int y) {
+    GLfloat deltaX = 300 - x;
+    GLfloat deltaY = 300 - y;
+    if (!( - 0.9 * M_PI / 2 < cam.tr.rotation_euler.x - deltaY / (1000) && cam.tr.rotation_euler.x - deltaY / (1000) < 0.9 * M_PI / 2)) {
+        deltaY = 0;
+    }
+    cam.tr.rotation_euler.x -= deltaY / (1000);
+    cam.tr.rotation_euler.y -= deltaX / (500);
+    
+   
+    glutWarpPointer(600/ 2, 600 / 2);
+
 }
 
 
@@ -115,6 +166,8 @@ int main(int argc, char** argv)
   glutDisplayFunc(display_callback);
   glutKeyboardFunc(keyboard_callback);
   glutSpecialFunc(special_callback);
+  glutPassiveMotionFunc(look);
+  glutSetCursor(GLUT_CURSOR_NONE);  //cache le cursor
   glutTimerFunc(25, timer_callback, 0);
 
   glewExperimental = true;
@@ -131,34 +184,35 @@ int main(int argc, char** argv)
 /*****************************************************************************\
 * draw_text                                                                   *
 \*****************************************************************************/
-void draw_text(const text * const t)
-{
-  if(!t->visible) return;
-  
-  glDisable(GL_DEPTH_TEST);
-  glUseProgram(t->prog);
-
-  vec2 size = (t->topRight - t->bottomLeft) / float(t->value.size());
-  
-  GLint loc_size = glGetUniformLocation(gui_program_id, "size"); CHECK_GL_ERROR();
-  if (loc_size == -1) std::cerr << "Pas de variable uniforme : size" << std::endl;
-  glUniform2f(loc_size,size.x, size.y);     CHECK_GL_ERROR();
-
-  glBindVertexArray(t->vao);                CHECK_GL_ERROR();
-  
-  for(unsigned i = 0; i < t->value.size(); ++i)
-  {
-    GLint loc_start = glGetUniformLocation(gui_program_id, "start"); CHECK_GL_ERROR();
-    if (loc_start == -1) std::cerr << "Pas de variable uniforme : start" << std::endl;
-    glUniform2f(loc_start,t->bottomLeft.x+i*size.x, t->bottomLeft.y);    CHECK_GL_ERROR();
-
-    GLint loc_char = glGetUniformLocation(gui_program_id, "c"); CHECK_GL_ERROR();
-    if (loc_char == -1) std::cerr << "Pas de variable uniforme : c" << std::endl;
-    glUniform1i(loc_char, (int)t->value[i]);    CHECK_GL_ERROR();
-    glBindTexture(GL_TEXTURE_2D, t->texture_id);                            CHECK_GL_ERROR();
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);                    CHECK_GL_ERROR();
-  }
-}
+//void draw_text(const text * const t)
+//{
+//  if(!t->visible) return;
+//  
+//  glDisable(GL_DEPTH_TEST);
+//  glUseProgram(t->prog);
+//
+//  vec2 size = (t->topRight - t->bottomLeft) / float(t->value.size());
+//  
+//  GLint loc_size = glGetUniformLocation(gui_program_id, "size"); CHECK_GL_ERROR();
+//  if (loc_size == -1) std::cerr << "Pas de variable uniforme : size" << std::endl;
+//  glUniform2f(loc_size,size.x, size.y);     CHECK_GL_ERROR();
+//
+//  glBindVertexArray(t->vao);                CHECK_GL_ERROR();
+//  
+//
+//  for(unsigned i = 0; i < t->value.size(); ++i)
+//  {
+//    GLint loc_start = glGetUniformLocation(gui_program_id, "start"); CHECK_GL_ERROR();
+//    if (loc_start == -1) std::cerr << "Pas de variable uniforme : start" << std::endl;
+//    glUniform2f(loc_start,t->bottomLeft.x+i*size.x, t->bottomLeft.y);    CHECK_GL_ERROR();
+//
+//    GLint loc_char = glGetUniformLocation(gui_program_id, "c"); CHECK_GL_ERROR();
+//    if (loc_char == -1) std::cerr << "Pas de variable uniforme : c" << std::endl;
+//    glUniform1i(loc_char, (int)t->value[i]);    CHECK_GL_ERROR();
+//    glBindTexture(GL_TEXTURE_2D, t->texture_id);                            CHECK_GL_ERROR();
+//    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);                    CHECK_GL_ERROR();
+//  }
+//}
 
 /*****************************************************************************\
 * draw_obj3d                                                                  *
@@ -216,36 +270,36 @@ void draw_obj3d(const objet3d* const obj, camera cam)
   glDrawElements(GL_TRIANGLES, 3*obj->nb_triangle, GL_UNSIGNED_INT, 0);     CHECK_GL_ERROR();
 }
 
-void init_text(text *t){
-  vec3 p0=vec3( 0.0f, 0.0f, 0.0f);
-  vec3 p1=vec3( 0.0f, 1.0f, 0.0f);
-  vec3 p2=vec3( 1.0f, 1.0f, 0.0f);
-  vec3 p3=vec3( 1.0f, 0.0f, 0.0f);
-
-  vec3 geometrie[4] = {p0, p1, p2, p3}; 
-  triangle_index index[2] = { triangle_index(0, 1, 2), triangle_index(0, 2, 3)};
-
-  glGenVertexArrays(1, &(t->vao));                                              CHECK_GL_ERROR();
-  glBindVertexArray(t->vao);                                                  CHECK_GL_ERROR();
-
-  GLuint vbo;
-  glGenBuffers(1, &vbo);                                                       CHECK_GL_ERROR();
-  glBindBuffer(GL_ARRAY_BUFFER,vbo);                                          CHECK_GL_ERROR();
-  glBufferData(GL_ARRAY_BUFFER,sizeof(geometrie),geometrie,GL_STATIC_DRAW);   CHECK_GL_ERROR();
-
-  glEnableVertexAttribArray(0); CHECK_GL_ERROR();
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); CHECK_GL_ERROR();
-
-  GLuint vboi;
-  glGenBuffers(1,&vboi);                                                      CHECK_GL_ERROR();
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vboi);                                 CHECK_GL_ERROR();
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(index),index,GL_STATIC_DRAW);   CHECK_GL_ERROR();
-
-  t->texture_id = glhelper::load_texture("data/fontB.tga");
-
-  t->visible = true;
-  t->prog = gui_program_id;
-}
+//void init_text(text *t){
+//  vec3 p0=vec3( 0.0f, 0.0f, 0.0f);
+//  vec3 p1=vec3( 0.0f, 1.0f, 0.0f);
+//  vec3 p2=vec3( 1.0f, 1.0f, 0.0f);
+//  vec3 p3=vec3( 1.0f, 0.0f, 0.0f);
+//
+//  vec3 geometrie[4] = {p0, p1, p2, p3}; 
+//  triangle_index index[2] = { triangle_index(0, 1, 2), triangle_index(0, 2, 3)};
+//
+//  glGenVertexArrays(1, &(t->vao));                                              CHECK_GL_ERROR();
+//  glBindVertexArray(t->vao);                                                  CHECK_GL_ERROR();
+//
+//  GLuint vbo;
+//  glGenBuffers(1, &vbo);                                                       CHECK_GL_ERROR();
+//  glBindBuffer(GL_ARRAY_BUFFER,vbo);                                          CHECK_GL_ERROR();
+//  glBufferData(GL_ARRAY_BUFFER,sizeof(geometrie),geometrie,GL_STATIC_DRAW);   CHECK_GL_ERROR();
+//
+//  glEnableVertexAttribArray(0); CHECK_GL_ERROR();
+//  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); CHECK_GL_ERROR();
+//
+//  GLuint vboi;
+//  glGenBuffers(1,&vboi);                                                      CHECK_GL_ERROR();
+//  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vboi);                                 CHECK_GL_ERROR();
+//  glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(index),index,GL_STATIC_DRAW);   CHECK_GL_ERROR();
+//
+//  t->texture_id = glhelper::load_texture("data/fontB.tga");
+//
+//  t->visible = true;
+//  t->prog = gui_program_id;
+//}
 
 GLuint upload_mesh_to_gpu(const mesh& m)
 {
@@ -299,7 +353,7 @@ void init_model_1()
 
   obj[0].nb_triangle = m.connectivity.size();
   obj[0].texture_id = glhelper::load_texture("data/stegosaurus.tga");
-  obj[0].visible = true;
+  obj[0].visible = false;
   obj[0].prog = shader_program_id;
 
   obj[0].tr.translation = vec3(-2.0, 0.0, -10.0);
@@ -360,6 +414,7 @@ void init_model_3()
 {
   // Chargement d'un maillage a partir d'un fichier
   mesh m = load_off_file("data/armadillo_light.off");
+   
 
   // Affecte une transformation sur les sommets du maillage
   float s = 0.01f;
@@ -379,18 +434,72 @@ void init_model_3()
   obj[2].nb_triangle = m.connectivity.size();
   obj[2].texture_id = glhelper::load_texture("data/white.tga");
 
-  obj[2].visible = true;
+  obj[2].visible = false;
   obj[2].prog = shader_program_id;
 
   obj[2].tr.translation = vec3(2.0, 0.0, -10.0);
 }
 
 void init_missil() {
-    /*mesh = load_off_file("data/missile.off");*/
-    float s = 0.01f;
+    //mesh m = load_off_file("data/stegosaurus.obj");
+    mesh m;
+    float i = 25;
+    //coordonnees geometriques des sommets
+    vec3 p0 = vec3(-i, -i, 5.0f);
+    vec3 p1 = vec3(i, -i, 5.0f);
+    vec3 p2 = vec3(i, i, 5.0f);
+    vec3 p3 = vec3(-i, i, 5.0f);
+
+    //normales pour chaque sommet
+    vec3 n0 = vec3(0.0f, 0.0f, 1.0f);
+    vec3 n1 = n0;
+    vec3 n2 = n0;
+    vec3 n3 = n0;
+
+    //couleur pour chaque sommet
+    vec3 c0 = vec3(0.0f, 0.0f, 1.0f);
+    vec3 c1 = c0;
+    vec3 c2 = c0;
+    vec3 c3 = c0;
+
+
+    //texture du sommet
+    vec2 t0 = vec2(0.0f, 0.0f);
+    vec2 t1 = vec2(1.0f, 0.0f);
+    vec2 t2 = vec2(1.0f, 1.0f);
+    vec2 t3 = vec2(0.0f, 1.0f);
+
+    vertex_opengl v0 = vertex_opengl(p0, n0, c0, t0);
+    vertex_opengl v1 = vertex_opengl(p1, n1, c1, t1);
+    vertex_opengl v2 = vertex_opengl(p2, n2, c2, t2);
+    vertex_opengl v3 = vertex_opengl(p3, n3, c3, t3);
+
+
+    m.vertex = { v0, v1, v2 ,v3};
+
+    //indice des triangles
+    triangle_index tri0 = triangle_index(0, 1, 2);
+    triangle_index tri1 = triangle_index(0,2,3);
+    m.connectivity = { tri0, tri1 };
+   /* float s = 0.01f;
     mat4 transform = mat4(s, 0.0f, 0.0f, 0.0f,
         0.0f, s, 0.0f, 0.0f,
         0.0f, 0.0f, s, 0.02f,
         0.0f, 0.0f, 0.0f, 0.0f);
-    //coucou
+
+    apply_deformation(&m, matrice_rotation(M_PI / 2.0f, 1.0f, 0.0f, 0.0f));
+    apply_deformation(&m, matrice_rotation(M_PI, 0.0f, 1.0f, 0.0f));
+    apply_deformation(&m, transform);*/
+
+    //update_normals(&m);
+    //fill_color(&m, vec3(1.0f, 1.0f, 1.0f));
+
+    obj[3].vao = upload_mesh_to_gpu(m);
+
+    obj[3].nb_triangle = m.connectivity.size();
+    obj[3].texture_id = glhelper::load_texture("data/stegosaurus.tga");
+    obj[3].visible = true;
+    obj[3].prog = shader_program_id;
+   /* obj[3].tr.translation = vec3(0.0f, 0.0f, 0.02f);*/
+
 }

@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cmath>
 
+
 #define GLEW_STATIC 1
 #include <GL/glew.h>
 
@@ -71,5 +72,6 @@ void draw_text(const text* const t);
 void init_model_1();
 void init_model_2();
 void init_model_3();
+void init_missil();
 
 void draw_obj3d(const objet3d* const obj, camera cam);
