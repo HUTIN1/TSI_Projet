@@ -72,6 +72,7 @@ void draw_text(const text* const t);
 void init_model_1();
 void init_model_2();
 void init_model_3();
-void init_missil();
+void init_mur();
+void init_missile();
 
 void draw_obj3d(const objet3d* const obj, camera cam);

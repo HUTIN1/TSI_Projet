@@ -15,11 +15,13 @@ camera cam;
 vec3 cam_vec_directeur = vec3(0.0f, 0.0f,-0.3f);
 vec3 cam_vec_cote = vec3( 0.3f, 0.0f, 0.0f);
 
-const int nb_obj = 4;
+const int nb_obj = 5;
 objet3d obj[nb_obj];
 
 const int nb_text = 2;
 text text_to_draw[nb_text];
+
+vec3 proj_directeur;
 
 
 /*****************************************************************************\
@@ -38,7 +40,8 @@ static void init()
   init_model_1();
   init_model_2();
   init_model_3();
-  init_missil();
+  init_mur();
+  init_missile();
 
 
   //text_to_draw[0].value = "CPE";
@@ -62,6 +65,10 @@ static void display_callback()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
     int i;
     for (i = 0; i < nb_obj; ++i) {
+        /*if (4 == i & obj[4].visible == true) {
+            obj[4].tr.translation += 0.1 * proj_directeur;
+            printf("%f %f %f\n", proj_directeur.x, proj_directeur.y, proj_directeur.z);
+        }*/
         draw_obj3d(obj + i, cam);
     }
   /*for(int i = 0; i < nb_text; ++i)
@@ -82,14 +89,18 @@ static void keyboard_callback(unsigned char key, int, int)
     case 'p':
       glhelper::print_screen();
       break;
-    case 'q':
-    case 'Q':
     case 27:
       exit(0);
       break;
 
     case 'a':
-        obj[3].visible = true;
+        obj[4].visible = !obj[4].visible;
+        obj[4].tr.translation = cam.tr.translation+ matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)*vec3(0.0f,-0.5f,-2.0f);
+ /*       obj[4].tr.rotation_euler = -1*cam.tr.rotation_euler;
+        obj[4].tr.rotation_euler.y += M_PI;*/
+        obj[4].tr.rotation_center = obj[4].tr.translation;
+        proj_directeur = obj[4].tr.translation / norm(obj[4].tr.translation);
+
         printf("j appuie sur a \n");
         break;
 
@@ -97,26 +108,24 @@ static void keyboard_callback(unsigned char key, int, int)
         obj[0].tr.translation.x += 0.01f;
         break;
 
-    case 'e':
+    case 'z':
         cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f)* matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_directeur;
-        cam.tr.rotation_center += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_directeur;
-        break;
-    case 'd':
-        cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) *  cam_vec_directeur;
-        cam.tr.rotation_center -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f,- 1.0f, 0.0f)  * cam_vec_directeur;
-        break;
-    case 'f':
-        cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  *cam_vec_cote;
-        cam.tr.rotation_center+= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_cote;
+        
         break;
     case 's':
+        cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) *  cam_vec_directeur;
+        break;
+    case 'd':
+        cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  *cam_vec_cote;
+        break;
+    case 'q':
         cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  *cam_vec_cote;
-        cam.tr.rotation_center -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_cote;
         break;
 
   
   }
   cam.tr.translation.y = 2.0f;
+  cam.tr.rotation_center = cam.tr.translation;
 }
 
 /*****************************************************************************\
@@ -440,7 +449,7 @@ void init_model_3()
   obj[2].tr.translation = vec3(2.0, 0.0, -10.0);
 }
 
-void init_missil() {
+void init_mur() {
     //mesh m = load_off_file("data/stegosaurus.obj");
     mesh m;
     float i = 25;
@@ -501,5 +510,36 @@ void init_missil() {
     obj[3].visible = true;
     obj[3].prog = shader_program_id;
    /* obj[3].tr.translation = vec3(0.0f, 0.0f, 0.02f);*/
+
+}
+
+
+void init_missile() {
+
+    // Chargement d'un maillage a partir d'un fichier
+    mesh m = load_obj_file("data/stegosaurus.obj");
+
+    // Affecte une transformation sur les sommets du maillage
+    float s = 0.2f;
+    mat4 transform = mat4(s, 0.0f, 0.0f, 0.0f,
+        0.0f, s, 0.0f, 0.0f,
+        0.0f, 0.0f, s, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f);
+    apply_deformation(&m, transform);
+
+    // Centre la rotation du modele 1 autour de son centre de gravite approximatif
+    obj[4].tr.rotation_center = vec3(0.0f, 1.0f, 0.0f);
+
+    update_normals(&m);
+    fill_color(&m, vec3(1.0f, 1.0f, 1.0f));
+
+    obj[4].vao = upload_mesh_to_gpu(m);
+
+    obj[4].nb_triangle = m.connectivity.size();
+    obj[4].texture_id = glhelper::load_texture("data/stegosaurus.tga");
+    obj[4].visible = true;
+    obj[4].prog = shader_program_id;
+
+    obj[4].tr.translation = vec3(-2.0, 0.0, -10.0);
 
 }
