@@ -64,6 +64,7 @@ static void display_callback()
     glClearColor(0.5f, 0.6f, 0.9f, 1.0f); CHECK_GL_ERROR();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
     int i;
+
     for (i = 0; i < nb_obj; ++i) {
         /*if (4 == i & obj[4].visible == true) {
             obj[4].tr.translation += 0.1 * proj_directeur;
