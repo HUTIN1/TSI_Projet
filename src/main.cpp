@@ -15,7 +15,7 @@ camera cam;
 vec3 cam_vec_directeur = vec3(0.0f, 0.0f,-0.3f);
 vec3 cam_vec_cote = vec3( 0.3f, 0.0f, 0.0f);
 
-const int nb_obj = 6;
+const int nb_obj = 7;
 objet3d obj[nb_obj];
 
 const int nb_text = 2;
@@ -412,13 +412,16 @@ void init_model_2()
   obj[1].nb_triangle = 2;
   obj[1].vao = upload_mesh_to_gpu(m);
 
-  obj[1].texture_id = glhelper::load_texture("data/grass.tga");
+  obj[1].texture_id = glhelper::load_texture("data/Sol.tga");
 
   obj[1].visible = true;
   obj[1].prog = shader_program_id;
 
   obj[5] = obj[1];
-  obj[5].tr.translation = vec3(0.0, 10.0, -60.0);
+  obj[5].tr.translation = vec3(0.0, 0.0, -60.0);
+
+  obj[6] = obj[1];
+  obj[6].tr.translation = vec3(-80.0, -2.0, -20.0);
 
 }
 
