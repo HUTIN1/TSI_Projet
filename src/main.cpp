@@ -15,7 +15,7 @@ camera cam;
 vec3 cam_vec_directeur = vec3(0.0f, 0.0f,-0.3f);
 vec3 cam_vec_cote = vec3( 0.3f, 0.0f, 0.0f);
 
-const int nb_obj = 7;
+const int nb_obj = 9;
 objet3d obj[nb_obj];
 
 const int nb_text = 2;
@@ -458,12 +458,11 @@ void init_model_3()
 }
 
 void init_mur() {
-    //mesh m = load_off_file("data/stegosaurus.obj");
     mesh m;
-    float i = 25;
+    float i = 10;
     //coordonnees geometriques des sommets
-    vec3 p0 = vec3(-i, -i, 5.0f);
-    vec3 p1 = vec3(i, -i, 5.0f);
+    vec3 p0 = vec3(-i, 0, 5.0f);
+    vec3 p1 = vec3(i, 0, 5.0f);
     vec3 p2 = vec3(i, i, 5.0f);
     vec3 p3 = vec3(-i, i, 5.0f);
 
@@ -514,10 +513,24 @@ void init_mur() {
     obj[3].vao = upload_mesh_to_gpu(m);
 
     obj[3].nb_triangle = m.connectivity.size();
-    obj[3].texture_id = glhelper::load_texture("data/stegosaurus.tga");
+    obj[3].texture_id = glhelper::load_texture("data/Mur.tga");
     obj[3].visible = true;
     obj[3].prog = shader_program_id;
    /* obj[3].tr.translation = vec3(0.0f, 0.0f, 0.02f);*/
+
+    obj[7] = obj[3];
+    obj[8] = obj[3];
+   
+
+    obj[7].tr.translation = vec3(0.0f, 0.0f, -67.0f);
+    obj[8].tr.translation = vec3(-90.0, -2.0, -20.0);
+   
+
+    obj[8].tr.rotation_euler = vec3(0.0f, 1.2f, 0.02f);
+    
+
+
+
 
 }
 
