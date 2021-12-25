@@ -23,6 +23,12 @@ text text_to_draw[nb_text];
 
 vec3 proj_directeur;
 
+objet_aabb missil_aabb;
+objet_aabb mur1_aabb;
+objet_aabb mur2_aabb;
+objet_aabb mur3_aabb;
+
+
 
 /*****************************************************************************\
 * initialisation                                                              *
@@ -66,10 +72,13 @@ static void display_callback()
     int i;
 
     for (i = 0; i < nb_obj; ++i) {
-        /*if (4 == i & obj[4].visible == true) {
-            obj[4].tr.translation += 0.1 * proj_directeur;
-            printf("%f %f %f\n", proj_directeur.x, proj_directeur.y, proj_directeur.z);
-        }*/
+        if (4 == i & obj[4].visible == true) {
+            obj[4].tr.translation += proj_directeur ;
+            //printf("%f %f %f\n", proj_directeur.x, proj_directeur.y, proj_directeur.z);
+            if (collision(missil_aabb, mur1_aabb, obj[4], obj[3]) || collision(missil_aabb, mur2_aabb, obj[4], obj[7]) || collision(missil_aabb, mur1_aabb, obj[4], obj[8])) {
+                obj[4].visible = false;
+            }
+        }
         draw_obj3d(obj + i, cam);
     }
   /*for(int i = 0; i < nb_text; ++i)
@@ -100,7 +109,7 @@ static void keyboard_callback(unsigned char key, int, int)
  /*       obj[4].tr.rotation_euler = -1*cam.tr.rotation_euler;
         obj[4].tr.rotation_euler.y += M_PI;*/
         obj[4].tr.rotation_center = obj[4].tr.translation;
-        proj_directeur = obj[4].tr.translation / norm(obj[4].tr.translation);
+        proj_directeur = matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * cam_vec_directeur;
 
         printf("j appuie sur a \n");
         break;
@@ -516,6 +525,7 @@ void init_mur() {
     obj[3].texture_id = glhelper::load_texture("data/Mur.tga");
     obj[3].visible = true;
     obj[3].prog = shader_program_id;
+    get_aabb(&m, &mur1_aabb.min_aabb, &mur1_aabb.max_aabb);
    /* obj[3].tr.translation = vec3(0.0f, 0.0f, 0.02f);*/
 
     obj[7] = obj[3];
@@ -527,9 +537,17 @@ void init_mur() {
    
 
     obj[8].tr.rotation_euler = vec3(0.0f, 1.2f, 0.02f);
+
     
+    mur1_aabb.max_aabb.x = 10;
+    mur1_aabb.max_aabb.y = 10;
+
+    mur2_aabb = mur1_aabb;
+    mur3_aabb = mur1_aabb;
 
 
+    printf("mur1 aabb min : %f %f %f\n", mur1_aabb.min_aabb.x, mur1_aabb.min_aabb.y, mur1_aabb.min_aabb.z);
+    printf("mur1 aabb max : %f %f %f\n", mur1_aabb.max_aabb.x, mur1_aabb.max_aabb.y, mur1_aabb.max_aabb.z);
 
 
 }
@@ -562,5 +580,108 @@ void init_missile() {
     obj[4].prog = shader_program_id;
 
     obj[4].tr.translation = vec3(-2.0, 0.0, -10.0);
+    get_aabb(&m,&missil_aabb.min_aabb, &missil_aabb.max_aabb);
+    printf("missil aabb min : %f %f %f\n", missil_aabb.min_aabb.x, missil_aabb.min_aabb.y, missil_aabb.min_aabb.z);
+    printf("missil aabb max : %f %f %f\n", missil_aabb.max_aabb.x, missil_aabb.max_aabb.y, missil_aabb.max_aabb.z);
 
+}
+
+BOOLEAN collision(objet_aabb obj1, objet_aabb obj2,objet3d objet1, objet3d objet2) {
+    obj1.max_aabb =matrice_rotation( objet1.tr.rotation_euler.x,-1.0f,0.0f,0.0f)* matrice_rotation(objet1.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)* matrice_rotation(objet1.tr.rotation_euler.z, 0.0f, 0.0f, -1.0f)* obj1.max_aabb;
+    obj1.min_aabb = matrice_rotation(objet1.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(objet1.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet1.tr.rotation_euler.z, 0.0f, 0.0f, -1.0f) * obj1.min_aabb;
+
+    obj1.max_aabb += objet1.tr.translation;
+    obj1.min_aabb += objet1.tr.translation;
+
+    obj2.max_aabb =  matrice_rotation(objet2.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * obj2.max_aabb;
+    obj2.min_aabb =  matrice_rotation(objet2.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * obj2.min_aabb;
+    
+    obj2.max_aabb += objet2.tr.translation;
+    obj2.min_aabb += objet2.tr.translation;
+
+    rangestructaabb(&obj1);
+    rangestructaabb(&obj2);
+    
+
+    float distz1 = abs(obj1.max_aabb.z - obj1.min_aabb.z);
+    float distz2 = abs(obj2.max_aabb.z - obj2.min_aabb.z);
+    if (distz1 < distz2) {
+        if (!(obj2.max_aabb.z > obj1.max_aabb.z && obj1.max_aabb.z > obj2.min_aabb.z)) {
+            if (!(obj2.max_aabb.z > obj1.min_aabb.z && obj1.min_aabb.z > obj2.min_aabb.z)) {
+                printf("1\n");
+                return false;
+            }
+        }
+    }
+    else {
+        if (!(obj1.max_aabb.z > obj2.max_aabb.z && obj2.max_aabb.z > obj1.min_aabb.z)) {
+            if (!(obj1.max_aabb.z > obj2.min_aabb.z && obj2.min_aabb.z > obj1.min_aabb.z)) {
+                printf("2\n");
+
+                return false;
+            }
+        }
+    }
+
+    float disty1 = abs(obj1.max_aabb.y - obj1.min_aabb.y);
+    float disty2 = abs(obj2.max_aabb.y - obj2.min_aabb.y);
+    if (disty1 < disty2) {
+        if (!(obj2.max_aabb.y > obj1.max_aabb.y && obj1.max_aabb.y > obj2.min_aabb.y)) {
+            if (!(obj2.max_aabb.y > obj1.min_aabb.y && obj1.min_aabb.y > obj2.min_aabb.y)) {
+                printf("3\n");
+                return false;
+            }
+        }
+    }
+    else {
+        if (!(obj1.max_aabb.y > obj2.max_aabb.y && obj2.max_aabb.y > obj1.min_aabb.y)) {
+            if (!(obj1.max_aabb.y > obj2.min_aabb.y && obj2.min_aabb.y > obj1.min_aabb.y)) {
+                printf("4\n");
+                return false;
+            }
+        }
+    }
+
+    float distx1 = abs(obj1.max_aabb.x - obj1.min_aabb.x);
+    float distx2 = abs(obj2.max_aabb.x - obj2.min_aabb.x);
+    if (distx1 < distx2) {
+        if (!(obj2.max_aabb.x > obj1.max_aabb.x && obj1.max_aabb.x > obj2.min_aabb.x)) {
+            if (!(obj2.max_aabb.x > obj1.min_aabb.x && obj1.min_aabb.x > obj2.min_aabb.x)) {
+                printf("5\n");
+                return false;
+            }
+        }
+    }
+    else {
+        if (!(obj1.max_aabb.x > obj2.max_aabb.x && obj2.max_aabb.x > obj1.min_aabb.x)) {
+            if (!(obj1.max_aabb.x > obj2.min_aabb.x && obj2.min_aabb.x > obj1.min_aabb.x)) {
+                printf("6\n");
+                return false;
+            }
+        }
+    }
+    printf("reussi\n");
+    return true;
+}
+
+
+void rangestructaabb(objet_aabb* obj) {
+    float v;
+    if (obj->max_aabb.z < obj->min_aabb.z) {
+        v = obj->max_aabb.z;
+        obj->max_aabb.z = obj->min_aabb.z;
+        obj->min_aabb.z = v;
+    }
+
+    if (obj->max_aabb.y < obj->min_aabb.y) {
+        v = obj->max_aabb.y;
+        obj->max_aabb.y = obj->min_aabb.y;
+        obj->min_aabb.y = v;
+    }
+
+    if (obj->max_aabb.x < obj->min_aabb.x) {
+        v = obj->max_aabb.x;
+        obj->max_aabb.x = obj->min_aabb.x;
+        obj->min_aabb.x = v;
+    }
 }

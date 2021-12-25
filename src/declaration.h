@@ -64,6 +64,11 @@ struct text : public objet
   vec2 topRight;
 };
 
+struct objet_aabb {
+    vec3 min_aabb;
+    vec3 max_aabb;
+};
+
 
 void init_text(text *t);
 void draw_text(const text* const t);
@@ -76,3 +81,5 @@ void init_mur();
 void init_missile();
 
 void draw_obj3d(const objet3d* const obj, camera cam);
+BOOLEAN collision(objet_aabb obj1, objet_aabb obj2, objet3d objet1, objet3d objet2);
+void rangestructaabb(objet_aabb* obj);
