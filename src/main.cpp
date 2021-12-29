@@ -29,6 +29,7 @@ objet_aabb mur2_aabb;
 objet_aabb mur3_aabb;
 objet_aabb portail_aabb;
 objet_aabb cam_aabb;
+objet_aabb sol_aabb;
 
 
 
@@ -57,8 +58,8 @@ static void init()
   init_missile();
   init_portail();
 
-  cam_aabb.max_aabb = vec3(1.0f, 2.0f, 0.0f);
-  cam_aabb.min_aabb = vec3(0.0f, 0.0f, 0.0f);
+  cam_aabb.max_aabb = vec3(1.0f, 2.0f, 1.0f);
+  cam_aabb.min_aabb = vec3(-1.0f, -4.0f, -1.0f);
 
 
   //text_to_draw[0].value = "CPE";
@@ -81,11 +82,12 @@ static void display_callback()
     glClearColor(0.5f, 0.6f, 0.9f, 1.0f); CHECK_GL_ERROR();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
     int i;
-    int liste[] = { 3,7,8 };
-    int Lliste = 3;
+    int liste[] = { 1, 5, 6, 3, 7, 8 };
+    int Lliste = 6;
     int u = 0;
     int liste_portail[] = { 9,10 };
     bool col = false;
+    objet_aabb col_aabb;
     
    
     for (i = 0; i < nb_obj; ++i) {
@@ -93,9 +95,13 @@ static void display_callback()
         //collision missil
         if (4 == i & obj[4].visible == true) {
             u = 0;
+            col_aabb = sol_aabb;
             obj[4].tr.translation += proj_directeur ;
             while(obj[4].visible == true && u < Lliste) { 
-                if (collision(missil_aabb, mur1_aabb, obj[4].tr.rotation_euler, obj[liste[u]].tr.rotation_euler,obj[4].tr.translation, obj[liste[u]].tr.translation)) {
+                if (u == 3) {
+                    col_aabb = mur1_aabb;
+                }
+                if (collision(missil_aabb, col_aabb, obj[4].tr.rotation_euler, obj[liste[u]].tr.rotation_euler,obj[4].tr.translation, obj[liste[u]].tr.translation)) {
                     obj[4].visible = false;
                     placement_portail(obj[liste[u]]);
                 }
@@ -418,10 +424,10 @@ void init_model_2()
   mesh m;
 
   //coordonnees geometriques des sommets
-  vec3 p0=vec3(-25.0f,0.0f,-25.0f);
-  vec3 p1=vec3( 25.0f,0.0f,-25.0f);
-  vec3 p2=vec3( 25.0f,0.0f, 25.0f);
-  vec3 p3=vec3(-25.0f,0.0f, 25.0f);
+  vec3 p0=vec3(-25.0f,-25.0f,0.0f);
+  vec3 p1=vec3( 25.0f,-25.0f,0.0f);
+  vec3 p2=vec3( 25.0f,25.0f, 0.0f);
+  vec3 p3=vec3(-25.0f,25.0f, 0.0f);
 
   //normales pour chaque sommet
   vec3 n0=vec3(0.0f,1.0f,0.0f);
@@ -460,12 +466,20 @@ void init_model_2()
 
   obj[1].visible = true;
   obj[1].prog = shader_program_id;
+  obj[1].tr.rotation_euler.x = M_PI / 2;
 
   obj[5] = obj[1];
   obj[5].tr.translation = vec3(0.0, 0.0, -60.0);
 
   obj[6] = obj[1];
   obj[6].tr.translation = vec3(-80.0, -2.0, -20.0);
+
+  get_aabb(&m, &sol_aabb.min_aabb, &sol_aabb.max_aabb);
+  sol_aabb.max_aabb.x = 25.0f;
+  sol_aabb.max_aabb.y = 25.0f;
+
+  printf("sol aabb min : %f %f %f\n", sol_aabb.min_aabb.x, sol_aabb.min_aabb.y, sol_aabb.min_aabb.z);
+  printf("sol aabb max : %f %f %f\n", sol_aabb.max_aabb.x, sol_aabb.max_aabb.y, sol_aabb.max_aabb.z);
 
 }
 
@@ -631,7 +645,7 @@ void init_portail(){
     vec3 p3 = vec3(-l/2, h/2, 0.0f);
 
     //normales pour chaque sommet
-    vec3 n0 = vec3(0.0f, 0.0f, 1.0f);
+    vec3 n0 = vec3(0.0f, 0.0f, -1.0f);
     vec3 n1 = n0;
     vec3 n2 = n0;
     vec3 n3 = n0;
@@ -679,20 +693,30 @@ void init_portail(){
 }
 
 BOOLEAN collision(objet_aabb obj1, objet_aabb obj2,vec3 objet1rot, vec3 objet2rot,vec3 objet1trans, vec3 objet2trans) {
+
+
     obj1.max_aabb =matrice_rotation( objet1rot.x,-1.0f,0.0f,0.0f)* matrice_rotation(objet1rot.y, 0.0f, -1.0f, 0.0f)* matrice_rotation(objet1rot.z, 0.0f, 0.0f, -1.0f)* obj1.max_aabb;
     obj1.min_aabb = matrice_rotation(objet1rot.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(objet1rot.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet1rot.z, 0.0f, 0.0f, -1.0f) * obj1.min_aabb;
 
     obj1.max_aabb += objet1trans;
     obj1.min_aabb += objet1trans;
 
-    obj2.max_aabb =  matrice_rotation(objet2rot.y, 0.0f, -1.0f, 0.0f) * obj2.max_aabb;
-    obj2.min_aabb =  matrice_rotation(objet2rot.y, 0.0f, -1.0f, 0.0f)  * obj2.min_aabb;
+    rangestructaabb(&obj2);
+    obj2.max_aabb = matrice_rotation(objet2rot.x, -1.0f, 0.0f, 0.0f)*matrice_rotation(objet2rot.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet2rot.z, 0.0f, 0.0f, -1.0f)*obj2.max_aabb;
+    obj2.min_aabb = matrice_rotation(objet2rot.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(objet2rot.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet2rot.z, 0.0f, 0.0f, -1.0f) * obj2.min_aabb;
     
+
     obj2.max_aabb += objet2trans;
     obj2.min_aabb += objet2trans;
 
+
     rangestructaabb(&obj1);
     rangestructaabb(&obj2);
+    //printf("missil aabb min : %f %f %f\n", obj1.min_aabb.x, obj1.min_aabb.y, obj1.min_aabb.z);
+    //printf("missl aabb max : %f %f %f\n", obj1.max_aabb.x, obj1.max_aabb.y, obj1.max_aabb.z);
+
+    //printf("sol aabb min : %f %f %f\n", obj2.min_aabb.x, obj2.min_aabb.y, obj2.min_aabb.z);
+    //printf("sol aabb max : %f %f %f\n", obj2.max_aabb.x, obj2.max_aabb.y, obj2.max_aabb.z);
     
 
     float distz1 = abs(obj1.max_aabb.z - obj1.min_aabb.z);
@@ -784,12 +808,10 @@ void placement_portail(objet3d objet) {
     obj[aff_port+9].tr.translation = objet.tr.translation+matrice_rotation(objet.tr.rotation_euler.x,1.0f,0.0f,0.0f)* matrice_rotation(objet.tr.rotation_euler.y, 0.0f, 1.0f, 0.0f)* matrice_rotation(objet.tr.rotation_euler.z, 0.0f, 0.0f, 1.0f)*pos;
     obj[aff_port + 9].tr.rotation_euler = objet.tr.rotation_euler;
 
-    //trans -= objet.tr.translation;
     trans = matrice_rotation(objet.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f)* matrice_rotation(objet.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)* matrice_rotation(objet.tr.rotation_euler.z, 0.0f, 0.0f, -1.0f)*trans;
-    if (trans.z > 0) {
+    if (trans.z < 0) {
         obj[aff_port+9].tr.rotation_euler.y += M_PI;
     }
-    //obj[9].tr.rotation_center = obj[9].tr.translation;
     //printf("rot mur %f %f %f \n", obj[9].tr.rotation_euler.x, obj[9].tr.rotation_euler.y, obj[9].tr.rotation_euler.z);
     //printf("rot portail %f %f %f \n", objet.tr.rotation_euler.x, objet.tr.rotation_euler.y, objet.tr.rotation_euler.z);
     //printf("rot mur8 %f %f %f \n", obj[8].tr.rotation_euler.x, obj[8].tr.rotation_euler.y, obj[8].tr.rotation_euler.z);
@@ -797,9 +819,15 @@ void placement_portail(objet3d objet) {
 
 void téléportation(objet3d portail) {
     cam.tr.translation = portail.tr.translation;
-    cam.tr.rotation_euler = portail.tr.rotation_euler;
+    if ((-0.9 * M_PI / 2 < portail.tr.rotation_euler.x  && portail.tr.rotation_euler.x  < 0.9 * M_PI / 2)) {
+        cam.tr.rotation_euler = portail.tr.rotation_euler;
+    } 
     cam.tr.rotation_euler.z = 0;
-    cam.tr.rotation_euler.y += M_PI-2*portail.tr.rotation_euler.y;
-    cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.z, 0.0f, 0.0f,-1.0f) * vec3(0.0f,0.0f,-2.0f);
+    cam.tr.rotation_euler.y += -2*portail.tr.rotation_euler.y;
+    cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.z, 0.0f, 0.0f,-1.0f) * vec3(0.0f,0.0f,-3.0f);
+    if (cam.tr.translation.y < 2.0f) {
+        cam.tr.translation.y = 2.0f;
+    }
     cam.tr.rotation_center = cam.tr.translation;
+    printf("%f %f %f \n", cam.tr.translation.x, cam.tr.translation.y, cam.tr.translation.z);
 }
