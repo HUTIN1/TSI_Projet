@@ -799,7 +799,7 @@ void téléportation(objet3d portail) {
     cam.tr.translation = portail.tr.translation;
     cam.tr.rotation_euler = portail.tr.rotation_euler;
     cam.tr.rotation_euler.z = 0;
-    cam.tr.rotation_euler.y += M_PI;
+    cam.tr.rotation_euler.y += M_PI-2*portail.tr.rotation_euler.y;
+    cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.z, 0.0f, 0.0f,-1.0f) * vec3(0.0f,0.0f,-2.0f);
     cam.tr.rotation_center = cam.tr.translation;
-    cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, 1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, 1.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.z, 0.0f, 0.0f,1.0f) * vec3(0.0f,0.0f,-1.0f);
 }
