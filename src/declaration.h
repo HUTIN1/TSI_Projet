@@ -79,7 +79,10 @@ void init_model_2();
 void init_model_3();
 void init_mur();
 void init_missile();
+void init_portail();
 
 void draw_obj3d(const objet3d* const obj, camera cam);
-BOOLEAN collision(objet_aabb obj1, objet_aabb obj2, objet3d objet1, objet3d objet2);
+BOOLEAN collision(objet_aabb obj1, objet_aabb obj2, vec3 objet1rot, vec3 objet2rot, vec3 objet1trans, vec3 objet2trans);
 void rangestructaabb(objet_aabb* obj);
+void placement_portail(objet3d objet);
+void téléportation(objet3d portail);
