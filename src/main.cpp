@@ -6,6 +6,7 @@
  \*****************************************************************************/
 
 #include "declaration.h"
+#include<time.h>
 
 //identifiant des shaders
 GLuint shader_program_id;
@@ -28,7 +29,7 @@ objet_aabb mur1_aabb;
 objet_aabb mur2_aabb;
 objet_aabb mur3_aabb;
 
-
+BOOLEAN jump ;
 
 /*****************************************************************************\
 * initialisation                                                              *
@@ -132,9 +133,36 @@ static void keyboard_callback(unsigned char key, int, int)
         cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  *cam_vec_cote;
         break;
 
+    case 'j':
+
+        cam.tr.translation.y = cam.tr.translation.y + 10 * (2.01f - cam.tr.translation.y);
+        
+        printf("1");
+        Sleep(1000);
+        //cam.tr.translation.y = cam.tr.translation.y + 10 * (2.01f - cam.tr.translation.y);
+        printf("2");
+
+       /* jump = true;
+
+        while (jump) {
+            while (0 <= cam.tr.translation.y <= 2.0) {
+                cam.tr.translation.y = cam.tr.translation.y + 200 * (2.01f - cam.tr.translation.y);
+                
+            }
+
+ 
+                jump = false;
+                printf("coucou2");
+        }
+        if (cam.tr.translation.y > 0.1f) {
+                cam.tr.translation.y += -(10 / 3.0f) * (3.0f - cam.tr.translation.y);
+                printf("coucou3");
+            }*/
+        
+
+
   
   }
-  cam.tr.translation.y = 2.0f;
   cam.tr.rotation_center = cam.tr.translation;
 }
 
@@ -685,3 +713,5 @@ void rangestructaabb(objet_aabb* obj) {
         obj->min_aabb.x = v;
     }
 }
+
+
