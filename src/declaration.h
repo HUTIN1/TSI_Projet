@@ -86,3 +86,6 @@ BOOLEAN collision(objet_aabb obj1, objet_aabb obj2, vec3 objet1rot, vec3 objet2r
 void rangestructaabb(objet_aabb* obj);
 void placement_portail(objet3d objet);
 void téléportation(objet3d portail);
+void keyboard_down(unsigned char key, int, int);
+void keyboard_up(unsigned char key, int, int);
+void deplacement();

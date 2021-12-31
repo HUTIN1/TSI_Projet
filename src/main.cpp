@@ -32,11 +32,19 @@ objet_aabb portail_aabb;
 objet_aabb cam_aabb;
 objet_aabb sol_aabb;
 
-BOOLEAN jump ;
+BOOLEAN jump = false ;
+int jumpframe = 10; //nombre de frame pour le jump
 
 
 
 int aff_port = 0;
+
+
+// varaible deplacement
+bool avancer = false;
+bool reculer = false;
+bool droite = false;
+bool gauche = false;
 
 
 
@@ -61,7 +69,7 @@ static void init()
   init_portail();
 
   cam_aabb.max_aabb = vec3(1.0f, 2.0f, 1.0f);
-  cam_aabb.min_aabb = vec3(-1.0f, -4.0f, -1.0f);
+  cam_aabb.min_aabb = vec3(-1.0f, -2.0f, -1.0f);
 
 
   //text_to_draw[0].value = "CPE";
@@ -87,11 +95,21 @@ static void display_callback()
     int liste[] = { 1, 5, 6, 3, 7, 8 };
     int Lliste = 6;
     int u = 0;
+    int lsol[] = { 1,5,6 };
     int liste_portail[] = { 9,10 };
     bool col = false;
     objet_aabb col_aabb;
+    deplacement();
     
-   
+
+    if (cam.tr.translation.y < -50) {//pour ne pas tomber trop bas
+        cam.tr.translation = vec3(0.0f, 0.0f, 0.0f);
+ 
+    }
+    
+    cam.tr.rotation_center = cam.tr.translation;
+    
+
     for (i = 0; i < nb_obj; ++i) {
 
         //collision missil
@@ -118,6 +136,18 @@ static void display_callback()
                 int objettel = !u;
                 téléportation(obj[liste_portail[objettel]]);
                 col = !col;
+            }
+            u++;
+        }
+        col = false;
+        u = 0;
+        while (u < 3 && !col) {
+            if (collision(cam_aabb, sol_aabb, cam.tr.rotation_euler, obj[lsol[u]].tr.rotation_euler, cam.tr.translation, obj[lsol[u]].tr.translation)) {
+                cam.tr.translation.y = obj[lsol[u]].tr.translation.y + 2.0f;
+                cam.tr.rotation_center.y = cam.tr.translation.y;
+                col = !col;
+                jump = false;
+                jumpframe = 10;
             }
             u++;
         }
@@ -152,15 +182,10 @@ static void keyboard_callback(unsigned char key, int, int)
         obj[4].tr.rotation_euler.y += M_PI;*/
         obj[4].tr.rotation_center = obj[4].tr.translation;
         proj_directeur = matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * cam_vec_directeur;
-
-        printf("j appuie sur a \n");
         break;
 
-    case 'b':
-        obj[0].tr.translation.x += 0.01f;
-        break;
 
-    case 'z':
+    /*case 'z':
         cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f)* matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_directeur;
         
         break;
@@ -172,39 +197,43 @@ static void keyboard_callback(unsigned char key, int, int)
         break;
     case 'q':
         cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  *cam_vec_cote;
-        break;
+        break;*/
 
-    case 'j':
-
-        cam.tr.translation.y = cam.tr.translation.y + 10 * (2.01f - cam.tr.translation.y);
-        
-        printf("1");
-        Sleep(1000);
-        //cam.tr.translation.y = cam.tr.translation.y + 10 * (2.01f - cam.tr.translation.y);
-        printf("2");
-
-       /* jump = true;
-
-        while (jump) {
-            while (0 <= cam.tr.translation.y <= 2.0) {
-                cam.tr.translation.y = cam.tr.translation.y + 200 * (2.01f - cam.tr.translation.y);
-                
-            }
-
- 
-                jump = false;
-                printf("coucou2");
+    case 'n':
+        if (!jump) {
+            jump = !jump;
         }
-        if (cam.tr.translation.y > 0.1f) {
-                cam.tr.translation.y += -(10 / 3.0f) * (3.0f - cam.tr.translation.y);
-                printf("coucou3");
-            }*/
+ //   case 'j':
+
+ //       cam.tr.translation.y = cam.tr.translation.y + 10 * (2.01f - cam.tr.translation.y);
+ //       
+ //       printf("1");
+ //       Sleep(1000);
+ //       //cam.tr.translation.y = cam.tr.translation.y + 10 * (2.01f - cam.tr.translation.y);
+ //       printf("2");
+
+ //      /* jump = true;
+
+ //       while (jump) {
+ //           while (0 <= cam.tr.translation.y <= 2.0) {
+ //               cam.tr.translation.y = cam.tr.translation.y + 200 * (2.01f - cam.tr.translation.y);
+ //               
+ //           }
+
+ //
+ //               jump = false;
+ //               printf("coucou2");
+ //       }
+ //       if (cam.tr.translation.y > 0.1f) {
+ //               cam.tr.translation.y += -(10 / 3.0f) * (3.0f - cam.tr.translation.y);
+ //               printf("coucou3");
+ //           }*/
         
 
 
   
   }
-  cam.tr.rotation_center = cam.tr.translation;
+  
 }
 
 /*****************************************************************************\
@@ -213,6 +242,63 @@ static void keyboard_callback(unsigned char key, int, int)
 static void special_callback(int key, int, int)
 {
 }
+
+void keyboard_down(unsigned char key, int, int) {// when a key is down
+    switch (key) {
+
+    case 'p':
+        glhelper::print_screen();
+        break;
+    case 27:
+        exit(0);
+        break;
+
+    case 'a':
+        obj[4].visible = !obj[4].visible;
+        obj[4].tr.translation = cam.tr.translation + matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * vec3(0.0f, -0.5f, -2.0f);
+        obj[4].tr.rotation_center = obj[4].tr.translation;
+        proj_directeur = matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * cam_vec_directeur;
+
+        break;
+
+    case 'z':
+        avancer = true;
+        break;
+    case 's':
+        reculer = true;
+        break;
+    case 'd':
+        droite = true;
+        break;
+    case 'q':
+        gauche = true;
+        break;
+    case 'n':
+        if (!jump) {
+            jump = !jump;
+        }
+        printf(" j appuie sur n \n");
+
+    }
+
+}      
+
+void keyboard_up(unsigned char key, int, int) {// when the key goes up
+    switch (key) {
+    case 'z':
+        avancer = false;
+        break;
+    case 's':
+        reculer = false;
+        break;
+    case 'd':
+        droite = false;
+        break;
+    case 'q':
+        gauche = false;
+        break;
+    }
+}       
 
 /****************************************************************************\
 * look                                                                       *
@@ -252,8 +338,10 @@ int main(int argc, char** argv)
   glutCreateWindow("OpenGL");
 
   glutDisplayFunc(display_callback);
-  glutKeyboardFunc(keyboard_callback);
+  //glutKeyboardFunc(keyboard_callback);
   glutSpecialFunc(special_callback);
+  glutKeyboardFunc(keyboard_down);       // when a key is down
+  glutKeyboardUpFunc(keyboard_up);       // when the key goes up
   glutPassiveMotionFunc(look);
   glutSetCursor(GLUT_CURSOR_NONE);  //cache le cursor
   glutTimerFunc(25, timer_callback, 0);
@@ -498,7 +586,7 @@ void init_model_2()
   obj[1].tr.rotation_euler.x = M_PI / 2;
 
   obj[5] = obj[1];
-  obj[5].tr.translation = vec3(0.0, 0.0, -60.0);
+  obj[5].tr.translation = vec3(0.0, 0.0, -55.0);
 
   obj[6] = obj[1];
   obj[6].tr.translation = vec3(-80.0, -2.0, -20.0);
@@ -545,7 +633,7 @@ void init_model_3()
 
 void init_mur() {
     mesh m;
-    float i = 10;
+    float i = 25;
     //coordonnees geometriques des sommets
     vec3 p0 = vec3(-i, 0, 0.0f);
     vec3 p1 = vec3(i, 0, 0.0f);
@@ -616,8 +704,8 @@ void init_mur() {
     obj[8].tr.rotation_euler = vec3(0.0f, 1.2f, 0.02f);
 
     
-    mur1_aabb.max_aabb.x = 10;
-    mur1_aabb.max_aabb.y = 10;
+    mur1_aabb.max_aabb.x = i;
+    mur1_aabb.max_aabb.y = i;
 
     mur2_aabb = mur1_aabb;
     mur3_aabb = mur1_aabb;
@@ -799,7 +887,6 @@ BOOLEAN collision(objet_aabb obj1, objet_aabb obj2,vec3 objet1rot, vec3 objet2ro
             }
         }
     }
-    printf("collision\n");
     return true;
 }
 
@@ -858,5 +945,34 @@ void téléportation(objet3d portail) {
         cam.tr.translation.y = 2.0f;
     }
     cam.tr.rotation_center = cam.tr.translation;
-    printf("%f %f %f \n", cam.tr.translation.x, cam.tr.translation.y, cam.tr.translation.z);
+}
+
+void deplacement() {
+    float r = cam.tr.translation.y;
+
+    if (jump && !jumpframe == 0) {
+        printf("je saute\n");
+        r += 0.6f;
+        printf("%f\n", r);
+        jumpframe--;
+    }
+    else {
+        r -= 0.3f; //gravité
+    } 
+
+    if (avancer) {
+        cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * cam_vec_directeur;
+    }
+    if (reculer) {
+        cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * cam_vec_directeur;
+    }
+    if (droite) {
+        cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * cam_vec_cote;
+    }
+    if (gauche) {
+        cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * cam_vec_cote;
+    }
+    cam.tr.translation.y = r;
+    
+    
 }
