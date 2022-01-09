@@ -16,11 +16,8 @@ camera cam;
 vec3 cam_vec_directeur = vec3(0.0f, 0.0f,-0.3f);
 vec3 cam_vec_cote = vec3( 0.3f, 0.0f, 0.0f);
 
-const int nb_obj = 11;
+const int nb_obj = 10;
 objet3d obj[nb_obj];
-
-const int nb_text = 2;
-text text_to_draw[nb_text];
 
 vec3 proj_directeur;
 
@@ -57,30 +54,16 @@ static void init()
 
   cam.projection = matrice_projection(60.0f*M_PI/180.0f,1.0f,0.01f,100.0f);
   cam.tr.translation = vec3(0.0f, 2.0f, 0.0f);
-  //cam.tr.translation = vec3(0.0f, 20.0f, 0.0f);
    cam.tr.rotation_center = vec3(0.0f, 1.0f, 0.0f);
    cam.tr.rotation_euler = vec3(0.0f, 0.0f, 0.0f);
 
-  init_model_1();
   init_model_2();
-  init_model_3();
   init_mur();
   init_missile();
   init_portail();
 
   cam_aabb.max_aabb = vec3(1.0f, 2.0f, 1.0f);
   cam_aabb.min_aabb = vec3(-1.0f, -2.0f, -1.0f);
-
-
-  //text_to_draw[0].value = "CPE";
-  //text_to_draw[0].bottomLeft = vec2(-0.2, 0.5);
-  //text_to_draw[0].topRight = vec2(0.2, 1);
-  //init_text(text_to_draw);
-
-  //text_to_draw[1]=text_to_draw[0];
-  //text_to_draw[1].value = "Lyon";
-  //text_to_draw[1].bottomLeft.y = 0.0f;
-  //text_to_draw[1].topRight.y = 0.5f;
  
 }
 
@@ -92,11 +75,11 @@ static void display_callback()
     glClearColor(0.5f, 0.6f, 0.9f, 1.0f); CHECK_GL_ERROR();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); CHECK_GL_ERROR();
     int i;
-    int liste[] = { 1, 5, 6, 3, 7, 8 };
-    int Lliste = 6;
+    int liste[] = { 0, 1, 2,3, 4, 5, 6 };
+    int Lliste = 7;
     int u = 0;
-    int lsol[] = { 1,5,6 };
-    int liste_portail[] = { 9,10 };
+    int lsol[] = { 0,1,2 };
+    int liste_portail[] = { 8,9 };
     bool col = false;
     objet_aabb col_aabb;
     deplacement();
@@ -113,16 +96,16 @@ static void display_callback()
     for (i = 0; i < nb_obj; ++i) {
 
         //collision missil
-        if (4 == i & obj[4].visible == true) {
+        if (7 == i & obj[7].visible == true) {
             u = 0;
             col_aabb = sol_aabb;
-            obj[4].tr.translation += proj_directeur ;
-            while(obj[4].visible == true && u < Lliste) { 
-                if (u == 3) {
+            obj[7].tr.translation += proj_directeur ;
+            while(obj[7].visible == true && u < Lliste) { 
+                if (u == 4) {
                     col_aabb = mur1_aabb;
                 }
-                if (collision(missil_aabb, col_aabb, obj[4].tr.rotation_euler, obj[liste[u]].tr.rotation_euler,obj[4].tr.translation, obj[liste[u]].tr.translation)) {
-                    obj[4].visible = false;
+                if (collision(missil_aabb, col_aabb, obj[7].tr.rotation_euler, obj[liste[u]].tr.rotation_euler,obj[7].tr.translation, obj[liste[u]].tr.translation)) {
+                    obj[7].visible = false;
                     placement_portail(obj[liste[u]]);
                 }
                 u++;
@@ -153,95 +136,12 @@ static void display_callback()
         }
         draw_obj3d(obj + i, cam);
     }
-  /*for(int i = 0; i < nb_text; ++i)
-    draw_text(text_to_draw + i);*/
 
   glutSwapBuffers();
  
 }
 
-/*****************************************************************************\
-* keyboard_callback                                                           *
-\*****************************************************************************/
-static void keyboard_callback(unsigned char key, int, int)
-{
-    float dl = 0.3f;
-  switch (key)
-  {
-    case 'p':
-      glhelper::print_screen();
-      break;
-    case 27:
-      exit(0);
-      break;
 
-    case 'a':
-        obj[4].visible = !obj[4].visible;
-        obj[4].tr.translation = cam.tr.translation+ matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)*vec3(0.0f,-0.5f,-2.0f);
- /*       obj[4].tr.rotation_euler = -1*cam.tr.rotation_euler;
-        obj[4].tr.rotation_euler.y += M_PI;*/
-        obj[4].tr.rotation_center = obj[4].tr.translation;
-        proj_directeur = matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * cam_vec_directeur;
-        break;
-
-
-    /*case 'z':
-        cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f)* matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  * cam_vec_directeur;
-        
-        break;
-    case 's':
-        cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) *  cam_vec_directeur;
-        break;
-    case 'd':
-        cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  *cam_vec_cote;
-        break;
-    case 'q':
-        cam.tr.translation -= matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)  *cam_vec_cote;
-        break;*/
-
-    case 'n':
-        if (!jump) {
-            jump = !jump;
-        }
- //   case 'j':
-
- //       cam.tr.translation.y = cam.tr.translation.y + 10 * (2.01f - cam.tr.translation.y);
- //       
- //       printf("1");
- //       Sleep(1000);
- //       //cam.tr.translation.y = cam.tr.translation.y + 10 * (2.01f - cam.tr.translation.y);
- //       printf("2");
-
- //      /* jump = true;
-
- //       while (jump) {
- //           while (0 <= cam.tr.translation.y <= 2.0) {
- //               cam.tr.translation.y = cam.tr.translation.y + 200 * (2.01f - cam.tr.translation.y);
- //               
- //           }
-
- //
- //               jump = false;
- //               printf("coucou2");
- //       }
- //       if (cam.tr.translation.y > 0.1f) {
- //               cam.tr.translation.y += -(10 / 3.0f) * (3.0f - cam.tr.translation.y);
- //               printf("coucou3");
- //           }*/
-        
-
-
-  
-  }
-  
-}
-
-/*****************************************************************************\
-* special_callback                                                            *
-\*****************************************************************************/
-static void special_callback(int key, int, int)
-{
-}
 
 void keyboard_down(unsigned char key, int, int) {// when a key is down
     switch (key) {
@@ -254,10 +154,14 @@ void keyboard_down(unsigned char key, int, int) {// when a key is down
         break;
 
     case 'a':
-        obj[4].visible = !obj[4].visible;
-        obj[4].tr.translation = cam.tr.translation + matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * vec3(0.0f, -0.5f, -2.0f);
-        obj[4].tr.rotation_center = obj[4].tr.translation;
+       
+        obj[7].visible = !obj[7].visible;
+        obj[7].tr.translation = cam.tr.translation + matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * vec3(0.0f, -0.5f, -2.0f);
+        obj[7].tr.rotation_center = obj[4].tr.translation;
         proj_directeur = matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * cam_vec_directeur;
+        if (abs(cam.tr.rotation_euler.y) > M_PI / 2) {
+            proj_directeur.y = -1 * proj_directeur.y;
+        }
 
         break;
 
@@ -338,8 +242,6 @@ int main(int argc, char** argv)
   glutCreateWindow("OpenGL");
 
   glutDisplayFunc(display_callback);
-  //glutKeyboardFunc(keyboard_callback);
-  glutSpecialFunc(special_callback);
   glutKeyboardFunc(keyboard_down);       // when a key is down
   glutKeyboardUpFunc(keyboard_up);       // when the key goes up
   glutPassiveMotionFunc(look);
@@ -357,38 +259,7 @@ int main(int argc, char** argv)
   return 0;
 }
 
-/*****************************************************************************\
-* draw_text                                                                   *
-\*****************************************************************************/
-//void draw_text(const text * const t)
-//{
-//  if(!t->visible) return;
-//  
-//  glDisable(GL_DEPTH_TEST);
-//  glUseProgram(t->prog);
-//
-//  vec2 size = (t->topRight - t->bottomLeft) / float(t->value.size());
-//  
-//  GLint loc_size = glGetUniformLocation(gui_program_id, "size"); CHECK_GL_ERROR();
-//  if (loc_size == -1) std::cerr << "Pas de variable uniforme : size" << std::endl;
-//  glUniform2f(loc_size,size.x, size.y);     CHECK_GL_ERROR();
-//
-//  glBindVertexArray(t->vao);                CHECK_GL_ERROR();
-//  
-//
-//  for(unsigned i = 0; i < t->value.size(); ++i)
-//  {
-//    GLint loc_start = glGetUniformLocation(gui_program_id, "start"); CHECK_GL_ERROR();
-//    if (loc_start == -1) std::cerr << "Pas de variable uniforme : start" << std::endl;
-//    glUniform2f(loc_start,t->bottomLeft.x+i*size.x, t->bottomLeft.y);    CHECK_GL_ERROR();
-//
-//    GLint loc_char = glGetUniformLocation(gui_program_id, "c"); CHECK_GL_ERROR();
-//    if (loc_char == -1) std::cerr << "Pas de variable uniforme : c" << std::endl;
-//    glUniform1i(loc_char, (int)t->value[i]);    CHECK_GL_ERROR();
-//    glBindTexture(GL_TEXTURE_2D, t->texture_id);                            CHECK_GL_ERROR();
-//    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);                    CHECK_GL_ERROR();
-//  }
-//}
+
 
 /*****************************************************************************\
 * draw_obj3d                                                                  *
@@ -446,36 +317,7 @@ void draw_obj3d(const objet3d* const obj, camera cam)
   glDrawElements(GL_TRIANGLES, 3*obj->nb_triangle, GL_UNSIGNED_INT, 0);     CHECK_GL_ERROR();
 }
 
-//void init_text(text *t){
-//  vec3 p0=vec3( 0.0f, 0.0f, 0.0f);
-//  vec3 p1=vec3( 0.0f, 1.0f, 0.0f);
-//  vec3 p2=vec3( 1.0f, 1.0f, 0.0f);
-//  vec3 p3=vec3( 1.0f, 0.0f, 0.0f);
-//
-//  vec3 geometrie[4] = {p0, p1, p2, p3}; 
-//  triangle_index index[2] = { triangle_index(0, 1, 2), triangle_index(0, 2, 3)};
-//
-//  glGenVertexArrays(1, &(t->vao));                                              CHECK_GL_ERROR();
-//  glBindVertexArray(t->vao);                                                  CHECK_GL_ERROR();
-//
-//  GLuint vbo;
-//  glGenBuffers(1, &vbo);                                                       CHECK_GL_ERROR();
-//  glBindBuffer(GL_ARRAY_BUFFER,vbo);                                          CHECK_GL_ERROR();
-//  glBufferData(GL_ARRAY_BUFFER,sizeof(geometrie),geometrie,GL_STATIC_DRAW);   CHECK_GL_ERROR();
-//
-//  glEnableVertexAttribArray(0); CHECK_GL_ERROR();
-//  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); CHECK_GL_ERROR();
-//
-//  GLuint vboi;
-//  glGenBuffers(1,&vboi);                                                      CHECK_GL_ERROR();
-//  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,vboi);                                 CHECK_GL_ERROR();
-//  glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(index),index,GL_STATIC_DRAW);   CHECK_GL_ERROR();
-//
-//  t->texture_id = glhelper::load_texture("data/fontB.tga");
-//
-//  t->visible = true;
-//  t->prog = gui_program_id;
-//}
+
 
 GLuint upload_mesh_to_gpu(const mesh& m)
 {
@@ -506,34 +348,7 @@ GLuint upload_mesh_to_gpu(const mesh& m)
   return vao;
 }
 
-void init_model_1()
-{
-  // Chargement d'un maillage a partir d'un fichier
-  mesh m = load_obj_file("data/stegosaurus.obj");
 
-  // Affecte une transformation sur les sommets du maillage
-  float s = 0.2f;
-  mat4 transform = mat4(   s, 0.0f, 0.0f, 0.0f,
-      0.0f,    s, 0.0f, 0.0f,
-      0.0f, 0.0f,   s , 0.0f,
-      0.0f, 0.0f, 0.0f, 1.0f);
-  apply_deformation(&m,transform);
-
-  // Centre la rotation du modele 1 autour de son centre de gravite approximatif
-  obj[0].tr.rotation_center = vec3(0.0f,0.0f,0.0f);
-
-  update_normals(&m);
-  fill_color(&m,vec3(1.0f,1.0f,1.0f));
-
-  obj[0].vao = upload_mesh_to_gpu(m);
-
-  obj[0].nb_triangle = m.connectivity.size();
-  obj[0].texture_id = glhelper::load_texture("data/stegosaurus.tga");
-  obj[0].visible = false;
-  obj[0].prog = shader_program_id;
-
-  obj[0].tr.translation = vec3(-2.0, 0.0, -10.0);
-}
 
 void init_model_2()
 {
@@ -576,60 +391,33 @@ void init_model_2()
   triangle_index tri1=triangle_index(0,2,3);  
   m.connectivity = {tri0, tri1};
 
-  obj[1].nb_triangle = 2;
-  obj[1].vao = upload_mesh_to_gpu(m);
+  obj[0].nb_triangle = 2;
+  obj[0].vao = upload_mesh_to_gpu(m);
 
-  obj[1].texture_id = glhelper::load_texture("data/Sol.tga");
+  obj[0].texture_id = glhelper::load_texture("data/Sol.tga");
 
-  obj[1].visible = true;
-  obj[1].prog = shader_program_id;
-  obj[1].tr.rotation_euler.x = M_PI / 2;
+  obj[0].visible = true;
+  obj[0].prog = shader_program_id;
+  obj[0].tr.rotation_euler.x = M_PI / 2;
 
-  obj[5] = obj[1];
-  obj[5].tr.translation = vec3(0.0, 0.0, -55.0);
+  obj[1] = obj[0];
+  obj[1].tr.translation = vec3(0.0, 0.0, -55.0);
 
-  obj[6] = obj[1];
-  obj[6].tr.translation = vec3(-80.0, -2.0, -20.0);
+  obj[2] = obj[0];
+  obj[2].tr.translation = vec3(-80.0, -2.0, -20.0);
+  obj[3] = obj[0];
+  obj[3].tr.translation.y = 25;
 
   get_aabb(&m, &sol_aabb.min_aabb, &sol_aabb.max_aabb);
   sol_aabb.max_aabb.x = 25.0f;
   sol_aabb.max_aabb.y = 25.0f;
 
-  printf("sol aabb min : %f %f %f\n", sol_aabb.min_aabb.x, sol_aabb.min_aabb.y, sol_aabb.min_aabb.z);
-  printf("sol aabb max : %f %f %f\n", sol_aabb.max_aabb.x, sol_aabb.max_aabb.y, sol_aabb.max_aabb.z);
+
 
 }
 
 
-void init_model_3()
-{
-  // Chargement d'un maillage a partir d'un fichier
-  mesh m = load_off_file("data/armadillo_light.off");
-   
 
-  // Affecte une transformation sur les sommets du maillage
-  float s = 0.01f;
-  mat4 transform = mat4(   s, 0.0f, 0.0f, 0.0f,
-      0.0f,    s, 0.0f, 0.50f,
-      0.0f, 0.0f,   s , 0.0f,
-      0.0f, 0.0f, 0.0f, 1.0f);
-  apply_deformation(&m,matrice_rotation(M_PI/2.0f,1.0f,0.0f,0.0f));
-  apply_deformation(&m,matrice_rotation(M_PI,0.0f,1.0f,0.0f));
-  apply_deformation(&m,transform);
-
-  update_normals(&m);
-  fill_color(&m,vec3(1.0f,1.0f,1.0f));
-
-  obj[2].vao = upload_mesh_to_gpu(m);
-
-  obj[2].nb_triangle = m.connectivity.size();
-  obj[2].texture_id = glhelper::load_texture("data/white.tga");
-
-  obj[2].visible = false;
-  obj[2].prog = shader_program_id;
-
-  obj[2].tr.translation = vec3(2.0, 0.0, -10.0);
-}
 
 void init_mur() {
     mesh m;
@@ -671,37 +459,25 @@ void init_mur() {
     triangle_index tri0 = triangle_index(0, 1, 2);
     triangle_index tri1 = triangle_index(0,2,3);
     m.connectivity = { tri0, tri1 };
-   /* float s = 0.01f;
-    mat4 transform = mat4(s, 0.0f, 0.0f, 0.0f,
-        0.0f, s, 0.0f, 0.0f,
-        0.0f, 0.0f, s, 0.02f,
-        0.0f, 0.0f, 0.0f, 0.0f);
 
-    apply_deformation(&m, matrice_rotation(M_PI / 2.0f, 1.0f, 0.0f, 0.0f));
-    apply_deformation(&m, matrice_rotation(M_PI, 0.0f, 1.0f, 0.0f));
-    apply_deformation(&m, transform);*/
+    obj[4].vao = upload_mesh_to_gpu(m);
 
-    //update_normals(&m);
-    //fill_color(&m, vec3(1.0f, 1.0f, 1.0f));
-
-    obj[3].vao = upload_mesh_to_gpu(m);
-
-    obj[3].nb_triangle = m.connectivity.size();
-    obj[3].texture_id = glhelper::load_texture("data/Mur.tga");
-    obj[3].visible = true;
-    obj[3].prog = shader_program_id;
+    obj[4].nb_triangle = m.connectivity.size();
+    obj[4].texture_id = glhelper::load_texture("data/Mur.tga");
+    obj[4].visible = true;
+    obj[4].prog = shader_program_id;
     get_aabb(&m, &mur1_aabb.min_aabb, &mur1_aabb.max_aabb);
    /* obj[3].tr.translation = vec3(0.0f, 0.0f, 0.02f);*/
 
-    obj[7] = obj[3];
-    obj[8] = obj[3];
+    obj[5] = obj[4];
+    obj[6] = obj[4];
    
 
-    obj[7].tr.translation = vec3(0.0f, 0.0f, -67.0f);
-    obj[8].tr.translation = vec3(-90.0, -2.0, -20.0);
+    obj[5].tr.translation = vec3(0.0f, 0.0f, -67.0f);
+    obj[6].tr.translation = vec3(-90.0, -2.0, -20.0);
    
 
-    obj[8].tr.rotation_euler = vec3(0.0f, 1.2f, 0.02f);
+    obj[6].tr.rotation_euler = vec3(0.0f, 1.2f, 0.02f);
 
     
     mur1_aabb.max_aabb.x = i;
@@ -709,11 +485,6 @@ void init_mur() {
 
     mur2_aabb = mur1_aabb;
     mur3_aabb = mur1_aabb;
-
-
-    printf("mur1 aabb min : %f %f %f\n", mur1_aabb.min_aabb.x, mur1_aabb.min_aabb.y, mur1_aabb.min_aabb.z);
-    printf("mur1 aabb max : %f %f %f\n", mur1_aabb.max_aabb.x, mur1_aabb.max_aabb.y, mur1_aabb.max_aabb.z);
-    printf("rot mur8 %f %f %f \n", obj[8].tr.rotation_euler.x, obj[8].tr.rotation_euler.y, obj[8].tr.rotation_euler.z);
 
 
 }
@@ -733,19 +504,19 @@ void init_missile() {
     apply_deformation(&m, transform);
 
     // Centre la rotation du modele 1 autour de son centre de gravite approximatif
-    obj[4].tr.rotation_center = vec3(0.0f, 1.0f, 0.0f);
+    obj[7].tr.rotation_center = vec3(0.0f, 1.0f, 0.0f);
 
     update_normals(&m);
     fill_color(&m, vec3(1.0f, 1.0f, 1.0f));
 
-    obj[4].vao = upload_mesh_to_gpu(m);
+    obj[7].vao = upload_mesh_to_gpu(m);
 
-    obj[4].nb_triangle = m.connectivity.size();
-    obj[4].texture_id = glhelper::load_texture("data/stegosaurus.tga");
-    obj[4].visible = true;
-    obj[4].prog = shader_program_id;
+    obj[7].nb_triangle = m.connectivity.size();
+    obj[7].texture_id = glhelper::load_texture("data/stegosaurus.tga");
+    obj[7].visible = true;
+    obj[7].prog = shader_program_id;
 
-    obj[4].tr.translation = vec3(-2.0, 0.0, -10.0);
+    obj[7].tr.translation = vec3(-2.0, 0.0, -10.0);
     get_aabb(&m,&missil_aabb.min_aabb, &missil_aabb.max_aabb);
 
 
@@ -794,14 +565,14 @@ void init_portail(){
     m.connectivity = { tri0, tri1 };
 
 
-    obj[9].vao = upload_mesh_to_gpu(m);
+    obj[8].vao = upload_mesh_to_gpu(m);
 
-    obj[9].nb_triangle = m.connectivity.size();
-    obj[9].texture_id = glhelper::load_texture("data/portail.jpg");
-    obj[9].visible = true;
-    obj[9].prog = shader_program_id;
-    obj[9].tr.translation = vec3(0.0f, 0.0f, 0.0f);
-    obj[10] = obj[9];
+    obj[8].nb_triangle = m.connectivity.size();
+    obj[8].texture_id = glhelper::load_texture("data/portail.jpg");
+    obj[8].visible = true;
+    obj[8].prog = shader_program_id;
+    obj[8].tr.translation = vec3(0.0f, 0.0f, 0.0f);
+    obj[9] = obj[8];
     get_aabb(&m, &portail_aabb.min_aabb, &portail_aabb.max_aabb);
     portail_aabb.max_aabb.x = l / 2;
     portail_aabb.max_aabb.y = h / 2;
@@ -812,15 +583,15 @@ void init_portail(){
 BOOLEAN collision(objet_aabb obj1, objet_aabb obj2,vec3 objet1rot, vec3 objet2rot,vec3 objet1trans, vec3 objet2trans) {
 
 
-    obj1.max_aabb =matrice_rotation( objet1rot.x,-1.0f,0.0f,0.0f)* matrice_rotation(objet1rot.y, 0.0f, -1.0f, 0.0f)* matrice_rotation(objet1rot.z, 0.0f, 0.0f, -1.0f)* obj1.max_aabb;
-    obj1.min_aabb = matrice_rotation(objet1rot.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(objet1rot.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet1rot.z, 0.0f, 0.0f, -1.0f) * obj1.min_aabb;
+    obj1.max_aabb =matrice_rotation( objet1rot.x,1.0f,0.0f,0.0f)* matrice_rotation(objet1rot.y, 0.0f, 1.0f, 0.0f)* matrice_rotation(objet1rot.z, 0.0f, 0.0f, 1.0f)* obj1.max_aabb;
+    obj1.min_aabb = matrice_rotation(objet1rot.x, 1.0f, 0.0f, 0.0f) * matrice_rotation(objet1rot.y, 0.0f, 1.0f, 0.0f) * matrice_rotation(objet1rot.z, 0.0f, 0.0f, 1.0f) * obj1.min_aabb;
 
     obj1.max_aabb += objet1trans;
     obj1.min_aabb += objet1trans;
 
     rangestructaabb(&obj2);
-    obj2.max_aabb = matrice_rotation(objet2rot.x, -1.0f, 0.0f, 0.0f)*matrice_rotation(objet2rot.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet2rot.z, 0.0f, 0.0f, -1.0f)*obj2.max_aabb;
-    obj2.min_aabb = matrice_rotation(objet2rot.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(objet2rot.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet2rot.z, 0.0f, 0.0f, -1.0f) * obj2.min_aabb;
+    obj2.max_aabb = matrice_rotation(objet2rot.x, 1.0f, 0.0f, 0.0f)*matrice_rotation(objet2rot.y, 0.0f, 1.0f, 0.0f) * matrice_rotation(objet2rot.z, 0.0f, 0.0f, 1.0f)*obj2.max_aabb;
+    obj2.min_aabb = matrice_rotation(objet2rot.x, 1.0f, 0.0f, 0.0f) * matrice_rotation(objet2rot.y, 0.0f, 1.0f, 0.0f) * matrice_rotation(objet2rot.z, 0.0f, 0.0f, 1.0f) * obj2.min_aabb;
     
 
     obj2.max_aabb += objet2trans;
@@ -829,11 +600,6 @@ BOOLEAN collision(objet_aabb obj1, objet_aabb obj2,vec3 objet1rot, vec3 objet2ro
 
     rangestructaabb(&obj1);
     rangestructaabb(&obj2);
-    //printf("missil aabb min : %f %f %f\n", obj1.min_aabb.x, obj1.min_aabb.y, obj1.min_aabb.z);
-    //printf("missl aabb max : %f %f %f\n", obj1.max_aabb.x, obj1.max_aabb.y, obj1.max_aabb.z);
-
-    //printf("sol aabb min : %f %f %f\n", obj2.min_aabb.x, obj2.min_aabb.y, obj2.min_aabb.z);
-    //printf("sol aabb max : %f %f %f\n", obj2.max_aabb.x, obj2.max_aabb.y, obj2.max_aabb.z);
     
 
     float distz1 = abs(obj1.max_aabb.z - obj1.min_aabb.z);
@@ -918,19 +684,15 @@ void placement_portail(objet3d objet) {
         aff_port = 0;
     }
     vec3 trans = proj_directeur;
-    vec3 pos = matrice_rotation(objet.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(objet.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet.tr.rotation_euler.z, 0.0f, 0.0f, -1.0f)*(obj[4].tr.translation - objet.tr.translation);
+    vec3 pos = matrice_rotation(objet.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(objet.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet.tr.rotation_euler.z, 0.0f, 0.0f, -1.0f) * (obj[7].tr.translation - objet.tr.translation);
     pos.z = 0.0f;
-    //printf("%f %f %f \n", pos.x, pos.y, pos.z);
-    obj[aff_port+9].tr.translation = objet.tr.translation+matrice_rotation(objet.tr.rotation_euler.x,1.0f,0.0f,0.0f)* matrice_rotation(objet.tr.rotation_euler.y, 0.0f, 1.0f, 0.0f)* matrice_rotation(objet.tr.rotation_euler.z, 0.0f, 0.0f, 1.0f)*pos;
-    obj[aff_port + 9].tr.rotation_euler = objet.tr.rotation_euler;
+    obj[aff_port + 8].tr.translation = objet.tr.translation + matrice_rotation(objet.tr.rotation_euler.x, 1.0f, 0.0f, 0.0f) * matrice_rotation(objet.tr.rotation_euler.y, 0.0f, 1.0f, 0.0f) * matrice_rotation(objet.tr.rotation_euler.z, 0.0f, 0.0f, 1.0f) * pos;
+    obj[aff_port + 8].tr.rotation_euler = objet.tr.rotation_euler;
 
-    trans = matrice_rotation(objet.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f)* matrice_rotation(objet.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f)* matrice_rotation(objet.tr.rotation_euler.z, 0.0f, 0.0f, -1.0f)*trans;
+    trans = matrice_rotation(objet.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(objet.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(objet.tr.rotation_euler.z, 0.0f, 0.0f, -1.0f) * trans;
     if (trans.z < 0) {
-        obj[aff_port+9].tr.rotation_euler.y += M_PI;
+        obj[aff_port + 8].tr.rotation_euler.y += M_PI;
     }
-    //printf("rot mur %f %f %f \n", obj[9].tr.rotation_euler.x, obj[9].tr.rotation_euler.y, obj[9].tr.rotation_euler.z);
-    //printf("rot portail %f %f %f \n", objet.tr.rotation_euler.x, objet.tr.rotation_euler.y, objet.tr.rotation_euler.z);
-    //printf("rot mur8 %f %f %f \n", obj[8].tr.rotation_euler.x, obj[8].tr.rotation_euler.y, obj[8].tr.rotation_euler.z);
 }
 
 void téléportation(objet3d portail) {
@@ -939,7 +701,7 @@ void téléportation(objet3d portail) {
         cam.tr.rotation_euler = portail.tr.rotation_euler;
     } 
     cam.tr.rotation_euler.z = 0;
-    cam.tr.rotation_euler.y += -2*portail.tr.rotation_euler.y;
+   cam.tr.rotation_euler.y += -2*portail.tr.rotation_euler.y;
     cam.tr.translation += matrice_rotation(cam.tr.rotation_euler.x, -1.0f, 0.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.y, 0.0f, -1.0f, 0.0f) * matrice_rotation(cam.tr.rotation_euler.z, 0.0f, 0.0f,-1.0f) * vec3(0.0f,0.0f,-3.0f);
     if (cam.tr.translation.y < 2.0f) {
         cam.tr.translation.y = 2.0f;
